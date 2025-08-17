@@ -29,7 +29,11 @@
 
 ```bash
 # 将本地仓库与GitHub存储库关联（请将<your-username>替换为你的GitHub用户名）
+<<<<<<< HEAD
 git remote add origin https://github.com/yinyingyang/zjmap.git
+=======
+git remote add origin https://github.com/<your-username>/zjmap.git
+>>>>>>> 5cb86db589a3a2e37ddfc7df5a6ffbf6ab69cf78
 
 # 推送代码到GitHub
 git push -u origin master
