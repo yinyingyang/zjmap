@@ -6,7 +6,9 @@ function initMap() {
     map = L.map('map', { 
         zoomControl: false, 
         attributionControl: false,
-        crs: L.CRS.Simple  // 使用简单坐标系统
+        crs: L.CRS.Simple,  // 使用简单坐标系统
+        minZoom: 1,  // 最小缩小倍数
+        maxZoom: 10   // 最大放大倍数
     }).setView(userState.lastCenter, userState.lastZoom);
 
     // 确保移除所有可能的控制元素
@@ -93,6 +95,10 @@ function switchCountry(country) {
         // 设置地图边界和视图
         map.setMaxBounds(maxBounds);
         map.fitBounds(mapBounds);
+        
+        // 设置地图的最小和最大缩放级别
+        map.setMinZoom(countryConfig.minZoom);
+        map.setMaxZoom(countryConfig.maxZoom);
     
         // 延迟加载国家标记，确保地图已更新
         setTimeout(function() {
@@ -223,17 +229,19 @@ function getCountryConfig(country) {
     // 城市默认配置
     const countryConfigs = {
         '森之国': {
-            center: [500, 500], // 地图中心坐标
-            zoom: 12,
+            center: [114, 93], // 地图中心坐标
+            minZoom: 2,  // 最小缩小倍数
+            maxZoom: 6,  // 最大放大倍数
             mapUrl: 'src/img/森之国.jpg', // 本地地图图片路径
-            x: 20,
-            y: 12,
-            maxX: 1000,
-            maxY: 1000
+            x: -1,
+            y: -1,
+            maxX: 227.5,
+            maxY: 187.5
         },
         '山之国': {
             center: [500, 500], // 地图中心坐标
-            zoom: 12,
+            minZoom: 1,  // 最小缩小倍数
+            maxZoom: 10, // 最大放大倍数
             mapUrl: 'src/img/山之国.jpg', // 本地地图图片路径
             x: 20,
             y: 12,
@@ -242,7 +250,8 @@ function getCountryConfig(country) {
         },
         '泽之国': {
             center: [500, 500], // 地图中心坐标
-            zoom: 12,
+            minZoom: 1,  // 最小缩小倍数
+            maxZoom: 10, // 最大放大倍数
             mapUrl: 'src/img/泽之国.jpg', // 本地地图图片路径
             x: 20,
             y: 12,
@@ -251,7 +260,8 @@ function getCountryConfig(country) {
         },
         '龙之国': {
             center: [110, 130], // 地图中心坐标
-            zoom: 5,
+            minZoom: 1,  // 最小缩小倍数
+            maxZoom: 8,  // 最大放大倍数
             mapUrl: 'src/img/龙之国.jpg', // 本地地图图片路径
             x: 19,
             y: 12,
