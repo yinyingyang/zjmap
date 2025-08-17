@@ -16,18 +16,18 @@ function initMap() {
     }, 100);
 
     // 添加地图图层
-    // 首先获取城市配置
-    const cityConfig = getCityConfig(currentCity);
+    // 首先获取国家配置
+    const countryConfig = getCountryConfig(currentCountry);
     
     // 创建自定义地图图层
     // 计算地图边界，使坐标xy增加比例为1
     const mapBounds = [
-        [cityConfig.y, cityConfig.x], 
-        [cityConfig.maxY, cityConfig.maxX]
+        [countryConfig.y, countryConfig.x], 
+        [countryConfig.maxY, countryConfig.maxX]
     ];
     
     // 添加本地地图图片
-    L.imageOverlay(cityConfig.mapUrl, mapBounds).addTo(map);
+    L.imageOverlay(countryConfig.mapUrl, mapBounds).addTo(map);
     
     // 设置地图边界，防止拖动超出地图范围
     map.setMaxBounds(mapBounds);
@@ -35,8 +35,8 @@ function initMap() {
     // 设置地图视图为全图显示
     map.fitBounds(mapBounds);
 
-    // 加载当前城市的标记
-    loadCityMarkers(currentCity);
+    // 加载当前国家的标记
+    loadCountryMarkers(currentCountry);
 
     // 地图移动结束事件
     map.on('moveend', function() {
@@ -56,17 +56,17 @@ function initMap() {
     });
 }
 
-// 切换城市
-function switchCity(city) {
-    console.log('切换城市:', city);
-    currentCity = city;
+// 切换国家
+function switchCountry(country) {
+    console.log('切换国家:', country);
+    currentCountry = country;
     // 清除当前地图上的所有标记
     clearMarkers();
     console.log('已清除所有标记');
     // 更新地图配置
-    const cityConfig = getCityConfig(city);
-    if (cityConfig) {
-        console.log('城市配置已加载:', cityConfig);
+    const countryConfig = getCountryConfig(country);
+    if (countryConfig) {
+        console.log('国家配置已加载:', countryConfig);
         // 移除所有图层（保留地图容器）
         map.eachLayer(function(layer) {
             if (!(layer instanceof L.Control)) {
@@ -77,26 +77,26 @@ function switchCity(city) {
         // 创建自定义地图图层
         // 计算地图边界，使坐标xy增加比例为1
         const mapBounds = [
-            [cityConfig.y, cityConfig.x],
-            [cityConfig.maxY, cityConfig.maxX]
+            [countryConfig.y, countryConfig.x],
+            [countryConfig.maxY, countryConfig.maxX]
         ];
         
         // 设置地图最大坐标值
         const maxBounds = [
             [0, 0],
-            [cityConfig.maxY, cityConfig.maxX]
+            [countryConfig.maxY, countryConfig.maxX]
         ];
     
         // 添加本地地图图片
-        L.imageOverlay(cityConfig.mapUrl, mapBounds).addTo(map);
+        L.imageOverlay(countryConfig.mapUrl, mapBounds).addTo(map);
     
         // 设置地图边界和视图
         map.setMaxBounds(maxBounds);
         map.fitBounds(mapBounds);
     
-        // 延迟加载城市标记，确保地图已更新
+        // 延迟加载国家标记，确保地图已更新
         setTimeout(function() {
-            loadCityMarkers(city);
+            loadCountryMarkers(country);
         }, 300);
     
         // 重新绑定鼠标移动事件，显示坐标
@@ -110,31 +110,49 @@ function switchCity(city) {
             document.getElementById('mouse-coordinates').textContent = '';
         });
     } else {
-        console.error('未找到城市配置:', city);
+        console.error('未找到国家配置:', country);
     }
 }
 
-// 加载城市标记
-function loadCityMarkers(city) {
-    console.log('加载城市标记:', city);
+// 加载国家标记
+function loadCountryMarkers(country) {
+    console.log('加载国家标记:', country);
     // 加载资源点标记
-    if (resourcesData[city]) {
-        console.log('找到资源数据，数量:', resourcesData[city].length);
-        resourcesData[city].forEach(resource => {
-            addResourceMarker(resource);
+    if (resourcesData[country]) {
+        console.log('找到资源数据，数量:', resourcesData[country].length);
+        
+        // 获取当前选中的资源类型
+        const selectedResourceTypes = [];
+        document.querySelectorAll('.resource-type-checkbox input:checked').forEach(checkbox => {
+            selectedResourceTypes.push(checkbox.value);
+        });
+        
+        // 如果没有选中的资源类型，隐藏所有资源点
+        if (selectedResourceTypes.length === 0) {
+            document.querySelectorAll('.resource-marker').forEach(marker => {
+                marker.style.display = 'none';
+            });
+            return;
+        }
+        
+        resourcesData[country].forEach(resource => {
+            // 检查资源类型是否被选中
+            if (selectedResourceTypes.includes(resource.name)) {
+                addResourceMarker(resource);
+            }
         });
     } else {
-        console.error('未找到城市资源数据:', city);
-        console.log('可用城市列表:', Object.keys(resourcesData));
+        console.error('未找到国家资源数据:', country);
+        console.log('可用国家列表:', Object.keys(resourcesData));
     }
 
     // 加载抽奖机标记
-    if (machinesData[city]) {
-        machinesData[city].forEach(machine => {
+    if (machinesData[country]) {
+        machinesData[country].forEach(machine => {
             addMachineMarker(machine);
         });
     } else {
-        console.error('未找到城市抽奖机数据:', city);
+        console.error('未找到国家抽奖机数据:', country);
     }
 }
 
@@ -142,8 +160,8 @@ function loadCityMarkers(city) {
 function addResourceMarker(resource) {
     const icon = L.icon({
         iconUrl: `src/img/icons/${resource.name}.png`,
-        iconSize: [25, 25],
-        iconAnchor: [12, 12]
+        iconSize: [50, 50],
+        iconAnchor: [25, 25]
     });
 
     // 遍历坐标列表，为每个坐标创建标记
@@ -155,11 +173,13 @@ function addResourceMarker(resource) {
         
         // 添加CSS类，用于筛选
         marker.getElement().classList.add('resource-marker');
+        
+        // 默认显示标记
+        marker.getElement().style.display = 'block';
 
         // 绑定弹窗
         marker.bindPopup(`
             <b>${resource.name}</b><br>
-            刷新时间: ${resource.refreshTime}分钟<br>
             坐标: ${coords[0]}, ${coords[1]}
         `);
     });
@@ -198,10 +218,10 @@ function clearMarkers() {
     });
 }
 
-// 获取城市配置
-function getCityConfig(city) {
+// 获取国家配置
+function getCountryConfig(country) {
     // 城市默认配置
-    const cityConfigs = {
+    const countryConfigs = {
         '森之国': {
             center: [500, 500], // 地图中心坐标
             zoom: 12,
@@ -240,7 +260,7 @@ function getCityConfig(city) {
         }
     };
 
-    return cityConfigs[city] || cityConfigs['森之国'];
+    return countryConfigs[country] || countryConfigs['森之国'];
 }
 
 // 显示资源详情

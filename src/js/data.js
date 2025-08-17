@@ -19,7 +19,7 @@ function loadResourcesData() {
         })
         .then(data => {
             resourcesData = data;
-            console.log('资源数据加载成功，可用城市:', Object.keys(resourcesData));
+            console.log('资源数据加载成功，可用国家:', Object.keys(resourcesData));
         })
         .catch(error => {
             console.error('加载资源数据出错:', error);
@@ -50,8 +50,7 @@ function loadUserState() {
         const savedState = getCookie('userState');
         if (savedState) {
             userState = JSON.parse(savedState);
-            currentCity = userState.lastCity || '森之国';
-            document.getElementById('city').value = currentCity;
+            currentCountry = userState.lastCountry || '森之国';
             console.log('用户状态加载成功');
         } else {
             console.log('没有找到保存的用户状态');
@@ -60,19 +59,19 @@ function loadUserState() {
         console.error('加载用户状态出错:', error);
         // 重置为默认状态
         userState = {
-        lastCity: '森之国',
+        lastCountry: '森之国',
         lastCenter: [0, 0],
         lastZoom: 10,
         claimedPrizes: {}
     };
-    currentCity = '森之国';
+    currentCountry = '森之国';
     }
 }
 
 // 保存用户状态
 function saveUserState() {
     try {
-        userState.lastCity = currentCity;
+        userState.lastCountry = currentCountry;
         userState.lastCenter = map.getCenter();
         userState.lastZoom = map.getZoom();
 

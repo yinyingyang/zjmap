@@ -200,6 +200,20 @@ main {
     font-weight: bold;
 }
 
+/* 国家选择器单选框组垂直排列 */
+#country-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#country-radio-group label {
+    margin-right: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 #city {
     padding: 8px;
     border-radius: 4px;

@@ -42,14 +42,14 @@
             "resourceId": "res6",
             "name": "刺刺果",
             "city": "山之国",
-            "coordinates": [[195,123], [217,67], [94,149]],
+            "coordinates": [[195,123], [217,67], [94,149],[95,150]],
             "refreshTime": 120
         },
         {
             "resourceId": "res7",
             "name": "板栗",
             "city": "山之国",
-            "coordinates": [[200,121], [48,96], [-118.2452, 34.0510]],
+            "coordinates": [[200,121], [48,96], [96,146]],
             "refreshTime": 90
         },
         {

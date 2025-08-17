@@ -1,17 +1,23 @@
 // search.js - 搜索和过滤功能
 
+// 获取当前选中的国家
+function getCurrentCountry() {
+    const checkedRadio = document.querySelector('input[name="country"]:checked');
+    return checkedRadio ? checkedRadio.value : '森之国';
+}
+
 // 更新资源类型复选框
 function updateResourceTypeCheckboxes() {
     const checkboxesContainer = document.getElementById('resource-type-checkboxes');
-    const currentCity = document.getElementById('city').value;
+    const currentCountry = getCurrentCountry();
     
     // 清空现有的复选框
     checkboxesContainer.innerHTML = '';
     
-    // 获取当前城市的资源类型
-    if (resourcesData[currentCity]) {
+    // 获取当前国家的资源类型
+    if (resourcesData[currentCountry]) {
         const resourceTypes = [];
-        resourcesData[currentCity].forEach(resource => {
+        resourcesData[currentCountry].forEach(resource => {
             if (!resourceTypes.includes(resource.name)) {
                 resourceTypes.push(resource.name);
             }
@@ -38,11 +44,11 @@ function updateResourceTypeCheckboxes() {
             checkbox.value = type;
             
             // 从保存的状态中读取选中状态，如果没有保存的状态则默认选中
-            if (savedResourceTypes[currentCity] && savedResourceTypes[currentCity].hasOwnProperty(type)) {
-                checkbox.checked = savedResourceTypes[currentCity][type];
-            } else {
-                checkbox.checked = true; // 默认选中
-            }
+        if (savedResourceTypes[currentCountry] && savedResourceTypes[currentCountry].hasOwnProperty(type)) {
+            checkbox.checked = savedResourceTypes[currentCountry][type];
+        } else {
+            checkbox.checked = true; // 默认选中
+        }
             
             label.appendChild(checkbox);
             label.appendChild(document.createTextNode(type));
@@ -62,8 +68,14 @@ function initSearch() {
     // 初始化资源类型复选框
     updateResourceTypeCheckboxes();
     
-    // 监听城市切换事件，更新资源类型复选框
-    document.getElementById('city').addEventListener('change', updateResourceTypeCheckboxes);
+    // 监听国家切换事件，更新资源类型复选框
+        document.querySelectorAll('input[name="country"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateResourceTypeCheckboxes();
+            }
+        });
+    });
     
     // 监听资源类型复选框变化事件
     document.getElementById('resource-type-checkboxes').addEventListener('change', function(e) {
@@ -85,8 +97,8 @@ function filterResourcesByType() {
         selectedResourceTypes.push(checkbox.value);
     });
     
-    // 获取当前城市
-    const currentCity = document.getElementById('city').value;
+    // 获取当前国家
+    const currentCountry = getCurrentCountry();
     
     // 隐藏所有资源点
     document.querySelectorAll('.resource-marker').forEach(marker => {
@@ -108,16 +120,16 @@ function filterResourcesByType() {
 
 // 保存资源类型状态到cookies
 function saveResourceTypesState() {
-    // 获取当前城市
-    const currentCity = document.getElementById('city').value;
+    // 获取当前国家
+    const currentCountry = getCurrentCountry();
     
     // 获取所有资源类型复选框的状态
     const resourceTypesState = {};
     document.querySelectorAll('.resource-type-checkbox input[type="checkbox"]').forEach(checkbox => {
-        if (!resourceTypesState[currentCity]) {
-            resourceTypesState[currentCity] = {};
+        if (!resourceTypesState[currentCountry]) {
+            resourceTypesState[currentCountry] = {};
         }
-        resourceTypesState[currentCity][checkbox.value] = checkbox.checked;
+        resourceTypesState[currentCountry][checkbox.value] = checkbox.checked;
     });
     
     // 从cookies中读取现有状态
@@ -131,11 +143,11 @@ function saveResourceTypesState() {
         }
     }
     
-    // 更新当前城市的状态
-    if (!savedResourceTypes[currentCity]) {
-        savedResourceTypes[currentCity] = {};
+    // 更新当前国家的状态
+    if (!savedResourceTypes[currentCountry]) {
+        savedResourceTypes[currentCountry] = {};
     }
-    Object.assign(savedResourceTypes[currentCity], resourceTypesState[currentCity]);
+    Object.assign(savedResourceTypes[currentCountry], resourceTypesState[currentCountry]);
     
     // 保存到cookies
     setCookie('resourceTypesState', JSON.stringify(savedResourceTypes), 365);
@@ -180,10 +192,10 @@ function searchResources(keyword) {
         return results;
     }
 
-    // 只搜索当前城市的数据
-    const currentCity = document.getElementById('city').value;
-    if (resourcesData[currentCity]) {
-        resourcesData[currentCity].forEach(resource => {
+    // 只搜索当前国家的数据
+    const currentCountry = getCurrentCountry();
+    if (resourcesData[currentCountry]) {
+        resourcesData[currentCountry].forEach(resource => {
             // 检查资源类型是否被选中
             if (!selectedResourceTypes.includes(resource.name)) {
                 return;
@@ -193,7 +205,7 @@ function searchResources(keyword) {
             if (resource.name.toLowerCase().includes(keyword)) {
                 results.push({
                     ...resource,
-                    city: currentCity,
+                    country: currentCountry,
                     type: 'resource'
                 });
             }
@@ -207,22 +219,22 @@ function searchResources(keyword) {
 function searchPrizes(keyword) {
     let results = [];
 
-    // 遍历所有城市的抽奖机
-    for (const city in machinesData) {
-        if (machinesData.hasOwnProperty(city)) {
-            machinesData[city].forEach(machine => {
+    // 遍历所有国家的抽奖机
+    for (const country in machinesData) {
+        if (machinesData.hasOwnProperty(country)) {
+            machinesData[country].forEach(machine => {
                 machine.prizes.forEach(prize => {
                     // 检查关键词是否匹配奖品名称或描述
                     if (prize.name.toLowerCase().includes(keyword) || (prize.description && prize.description.toLowerCase().includes(keyword))) {
                         results.push({
-                            ...prize,
-                            machineId: machine.machineId,
-                            machineName: machine.name,
-                            city: city,
-                            x: machine.x,
-                            y: machine.y,
-                            type: 'prize'
-                        });
+                        ...prize,
+                        machineId: machine.machineId,
+                        machineName: machine.name,
+                        country: country,
+                        x: machine.x,
+                        y: machine.y,
+                        type: 'prize'
+                    });
                     }
                 });
             });
@@ -250,21 +262,21 @@ function displaySearchResults(results, searchType) {
         if (searchType === 'resource') {
             li.innerHTML = `
                 <div><strong>${result.name}</strong> (${result.type})</div>
-                <div>城市: ${getCityName(result.city)}</div>
+                <div>国家: ${getCountryName(result.country)}</div>
                 <div>数量: ${result.amount}</div>
             `;
         } else if (searchType === 'prize') {
             li.innerHTML = `
                 <div><strong>${result.name}</strong></div>
                 <div>所属抽奖机: ${result.machineName}</div>
-                <div>城市: ${getCityName(result.city)}</div>
+                <div>国家: ${getCountryName(result.country)}</div>
             `;
         }
 
         // 点击结果项，跳转到地图位置
         li.addEventListener('click', function() {
-            // 切换到对应的城市
-            switchCity(result.city);
+            // 切换到对应的国家
+            switchCountry(result.country);
             // 定位到资源点或抽奖机位置
             map.setView([result.y, result.x], 15);
             // 隐藏搜索结果
@@ -277,13 +289,13 @@ function displaySearchResults(results, searchType) {
     document.querySelector('.search-results').style.display = 'block';
 }
 
-// 获取城市名称
-function getCityName(cityCode) {
-    const cityNames = {
-        'city1': '新手村',
-        'city2': '主城',
-        'city3': '边境要塞'
+// 获取国家名称
+function getCountryName(countryCode) {
+    const countryNames = {
+        'country1': '新手村',
+        'country2': '主城',
+        'country3': '边境要塞'
     };
 
-    return cityNames[cityCode] || cityCode;
+    return countryNames[countryCode] || countryCode;
 }

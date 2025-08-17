@@ -6,6 +6,30 @@
 
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', function() {
+    // 从cookie获取默认选中的国家，如果没有则默认为第一个
+    const savedState = getCookie('userState');
+    let defaultCountry = '森之国';
+    if (savedState) {
+        try {
+            const userState = JSON.parse(savedState);
+            defaultCountry = userState.lastCountry || '森之国';
+        } catch (error) {
+            console.error('解析用户状态出错:', error);
+        }
+    }
+    
+    // 设置默认选中的单选框
+    const defaultRadio = document.querySelector(`input[name="country"][value="${defaultCountry}"]`);
+    if (defaultRadio) {
+        defaultRadio.checked = true;
+    } else {
+        // 如果没有找到对应的单选框，则默认选中第一个
+        const firstRadio = document.querySelector('input[name="country"]');
+        if (firstRadio) {
+            firstRadio.checked = true;
+            defaultCountry = firstRadio.value;
+        }
+    }
     // 初始化数据
     initData()
         .then(() => {
@@ -15,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
             initMap();
             // 初始化搜索功能
             initSearch();
+            // 切换到默认国家
+            switchCountry(defaultCountry);
             console.log('杖剑传说地图加载完成');
         })
         .catch(error => {
@@ -56,16 +82,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 城市切换事件 (只在元素存在时添加)
-    const citySelector = document.getElementById('city');
-    if (citySelector) {
-        citySelector.addEventListener('change', function() {
-            const city = this.value;
-            switchCity(city);
-            // 保存用户状态
-            saveUserState();
+    // 国家切换事件
+    document.querySelectorAll('input[name="country"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const selectedCountry = this.value;
+                switchCountry(selectedCountry);
+                // 保存用户状态
+                userState.lastCountry = selectedCountry;
+                saveUserState();
+            }
         });
-    }
+    })
 
     // 地图缩放事件 (只在元素存在时添加)
     const zoomInBtn = document.getElementById('zoom-in');
@@ -126,11 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 全局变量
 let map = null;
-let currentCity = '森之国';
+let currentCountry = '森之国';
 let resourcesData = {};
 let machinesData = {};
 let userState = {
-    lastCity: '森之国',
+    lastCountry: '森之国',
     lastCenter: [0, 0],
     lastZoom: 10,
     claimedPrizes: {}
