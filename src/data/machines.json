@@ -1,0 +1,146 @@
+{
+    "森之国": [
+        {
+            "machineId": "mach1",
+            "name": "新手抽奖机",
+            "city": "森之国",
+            "x": -74.0065,
+            "y": 40.7123,
+            "prizes": [
+                {
+                    "prizeId": "prize1",
+                    "name": "木剑",
+                    "description": "基础武器，攻击力+5"
+                },
+                {
+                    "prizeId": "prize2",
+                    "name": "皮甲",
+                    "description": "基础防具，防御力+3"
+                },
+                {
+                    "prizeId": "prize3",
+                    "name": "小血瓶",
+                    "description": "回复20点生命值"
+                },
+                {
+                    "prizeId": "prize4",
+                    "name": "金币袋",
+                    "description": "包含50金币"
+                }
+            ]
+        }
+    ],
+    "山之国": [
+        {
+            "machineId": "mach2",
+            "name": "高级抽奖机",
+            "city": "山之国",
+            "x": -118.2432,
+            "y": 34.0517,
+            "prizes": [
+                {
+                    "prizeId": "prize5",
+                    "name": "铁剑",
+                    "description": "中级武器，攻击力+10"
+                },
+                {
+                    "prizeId": "prize6",
+                    "name": "铁甲",
+                    "description": "中级防具，防御力+6"
+                },
+                {
+                    "prizeId": "prize7",
+                    "name": "大血瓶",
+                    "description": "回复50点生命值"
+                },
+                {
+                    "prizeId": "prize8",
+                    "name": "钻石袋",
+                    "description": "包含100金币"
+                },
+                {
+                    "prizeId": "prize9",
+                    "name": "技能书",
+                    "description": "随机习得一个初级技能"
+                }
+            ]
+        }
+    ],
+    "泽之国": [
+        {
+            "machineId": "mach3",
+            "name": "水系抽奖机",
+            "city": "泽之国",
+            "x": -87.6293,
+            "y": 41.8786,
+            "prizes": [
+                {
+                    "prizeId": "prize10",
+                    "name": "水之剑",
+                    "description": "水系武器，攻击力+15"
+                },
+                {
+                    "prizeId": "prize11",
+                    "name": "水之甲",
+                    "description": "水系防具，防御力+8"
+                },
+                {
+                    "prizeId": "prize12",
+                    "name": "水灵瓶",
+                    "description": "回复30点生命值和20点魔法值"
+                },
+                {
+                    "prizeId": "prize13",
+                    "name": "珍珠袋",
+                    "description": "包含80金币和稀有珍珠"
+                },
+                {
+                    "prizeId": "prize14",
+                    "name": "水系技能书",
+                    "description": "习得一个水系技能"
+                }
+            ]
+        }
+    ],
+    "龙之国": [
+        {
+            "machineId": "mach4",
+            "name": "龙之抽奖机",
+            "city": "龙之国",
+            "x": 0,
+            "y": 0,
+            "prizes": [
+                {
+                    "prizeId": "prize15",
+                    "name": "龙剑",
+                    "description": "高级武器，攻击力+25"
+                },
+                {
+                    "prizeId": "prize16",
+                    "name": "龙甲",
+                    "description": "高级防具，防御力+15"
+                },
+                {
+                    "prizeId": "prize17",
+                    "name": "龙血瓶",
+                    "description": "回复全部生命值和魔法值"
+                },
+                {
+                    "prizeId": "prize18",
+                    "name": "龙晶袋",
+                    "description": "包含200金币和稀有龙晶"
+                },
+                {
+                    "prizeId": "prize19",
+                    "name": "龙之技能书",
+                    "description": "习得一个高级龙系技能"
+                },
+                {
+                    "prizeId": "prize20",
+                    "name": "龙之翼",
+                    "description": "飞行道具，大幅提升移动速度"
+                }
+            ]
+        }
+    ]
+}

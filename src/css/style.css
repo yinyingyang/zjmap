@@ -1,0 +1,452 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 侧边栏样式 */
+.sidebar-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    background-color: #3a5a78;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -350px;  /* 隐藏侧边栏 */
+    width: 350px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: left 0.3s;
+    overflow-y: auto;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-header {
+    background-color: #3a5a78;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.sidebar-content {
+    padding: 15px;
+}
+
+.sidebar-content .city-selector {
+    margin-bottom: 20px;
+}
+
+.sidebar-content .search-container {
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 15px;
+    box-shadow: none;
+}
+
+.sidebar-content .search-container h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.sidebar-content .search-results h4 {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #3a5a78;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* 主要内容区域样式 */
+main {
+    padding: 0;
+    margin: 0;
+}
+
+.map-container {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+.mouse-coordinates {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 右下角缩放控制 */
+.bottom-right-zoom-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+}
+
+.bottom-right-zoom-controls button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    background-color: #3a5a78;
+    color: white;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: background-color 0.3s;
+}
+
+.bottom-right-zoom-controls button:hover {
+    background-color: #2a4a68;
+}
+
+.map-controls {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+}
+
+.city-selector {
+    display: flex;
+    align-items: center;
+}
+
+.city-selector label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+#city {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.zoom-controls {
+    display: flex;
+}
+
+.zoom-controls button {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    background-color: #3a5a78;
+    color: white;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: background-color 0.3s;
+}
+
+.zoom-controls button:hover {
+    background-color: #2a4a68;
+}
+
+.search-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.search-container h2 {
+    margin-bottom: 1rem;
+    color: #3a5a78;
+}
+
+.search-box {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+#search-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 16px;
+}
+
+#search-button {
+    padding: 10px 15px;
+    background-color: #3a5a78;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#search-button:hover {
+    background-color: #2a4a68;
+}
+
+.search-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 1rem;
+}
+
+.resource-type-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.resource-type-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.resource-type-checkbox input[type="checkbox"] {
+    margin: 0;
+}
+
+.search-filters label {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.search-filters select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.search-results h3 {
+    margin-bottom: 0.5rem;
+    color: #3a5a78;
+}
+
+#results-list {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+#results-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#results-list li:hover {
+    background-color: #f9f9f9;
+}
+
+/* 隐藏Leaflet地图归因控件 */
+.leaflet-control-attribution {
+    display: none !important;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #3a5a78;
+}
+
+.prizes-list h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #3a5a78;
+}
+
+#prizes-list {
+    list-style: none;
+}
+
+#prizes-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prize-checkbox {
+    margin-left: 10px;
+}
+
+.prize-unclaimed {
+    color: #333;
+}
+
+.prize-claimed {
+    color: #aaa;
+    text-decoration: line-through;
+}
+
+/* 底部样式 */
+footer {
+    background-color: #3a5a78;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .map-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .city-selector {
+        margin-bottom: 10px;
+    }
+
+    .search-filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-content {
+        margin: 20% auto;
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    #map {
+        height: 400px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin: 5px 0;
+    }
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杖剑传说地图</title>
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/leaflet.css" />
+    <script src="src/js/leaflet.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏切换按钮 -->
+        <button id="sidebar-toggle" class="sidebar-toggle">☰</button>
+
+        <!-- 侧边栏 -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>杖剑传说地图</h2>
+                <button id="close-sidebar" class="close-sidebar">&times;</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="city-selector">
+                    <label for="city">选择城市:</label>
+                    <select id="city">
+                        <option value="森之国">森之国</option>
+                        <option value="山之国">山之国</option>
+                        <option value="泽之国">泽之国</option>
+                        <option value="龙之国">龙之国</option>
+                    </select>
+                </div>
+                
+                <div class="search-container">
+                    <h3>搜索</h3>
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="搜索资源或奖品...">
+                        <button id="search-button">搜索</button>
+                    </div>
+                    <div class="search-filters">
+                        <label for="search-type">搜索类型:</label>
+                        <select id="search-type">
+                            <option value="resource">资源</option>
+                            <option value="prize">奖品</option>
+                        </select>
+                    </div>
+                    <div class="search-results">
+                        <h4>搜索结果</h4>
+                        <ul id="results-list"></ul>
+                    </div>
+                    <div id="resource-type-checkboxes" class="resource-type-checkboxes">
+                        <!-- 资源类型复选框将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <div class="map-container">
+                <div id="map"></div>
+                <div id="mouse-coordinates" class="mouse-coordinates"></div>
+                <!-- 右下角缩放控制 -->
+                <div class="bottom-right-zoom-controls">
+                    <button id="zoom-in">+</button>
+                    <button id="zoom-out">-</button>
+                </div>
+            </div>
+
+            <!-- 搜索功能已整合到侧边栏中 -->
+
+            <div id="resource-detail" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2 id="resource-name"></h2>
+                    <p><strong>类型:</strong> <span id="resource-type"></span></p>
+                    <p><strong>数量:</strong> <span id="resource-amount"></span></p>
+                    <p><strong>刷新时间:</strong> <span id="resource-refresh"></span></p>
+                </div>
+            </div>
+
+            <div id="machine-detail" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2 id="machine-name"></h2>
+                    <div class="prizes-list">
+                        <h3>奖品列表</h3>
+                        <ul id="prizes-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚已移除 -->
+    </div>
+
+    <script src="src/js/map.js"></script>
+    <script src="src/js/search.js"></script>
+    <script src="src/js/data.js"></script>
+    <script src="src/js/main.js"></script>
+</body>
+</html>
