@@ -2,13 +2,13 @@
 
 // 初始化地图
 function initMap() {
-    // 创建地图实例，禁用默认缩放控制
+    // 创建地图实例，禁用默认自带缩放控制
     map = L.map('map', { 
         zoomControl: false, 
         attributionControl: false,
         crs: L.CRS.Simple,  // 使用简单坐标系统
-        minZoom: 1,  // 最小缩小倍数
-        maxZoom: 10   // 最大放大倍数
+        minZoom: 2,  // 最小缩小倍数
+        maxZoom: 6   // 最大放大倍数
     }).setView(userState.lastCenter, userState.lastZoom);
 
     // 确保移除所有可能的控制元素
@@ -17,45 +17,6 @@ function initMap() {
         zoomControls.forEach(control => control.remove());
     }, 100);
 
-    // 添加地图图层
-    // 首先获取国家配置
-    const countryConfig = getCountryConfig(currentCountry);
-    
-    // 创建自定义地图图层
-    // 计算地图边界，使坐标xy增加比例为1
-    const mapBounds = [
-        [countryConfig.y, countryConfig.x], 
-        [countryConfig.maxY, countryConfig.maxX]
-    ];
-    
-    // 添加本地地图图片
-    L.imageOverlay(countryConfig.mapUrl, mapBounds).addTo(map);
-    
-    // 设置地图边界，防止拖动超出地图范围
-    map.setMaxBounds(mapBounds);
-    
-    // 设置地图视图为全图显示
-    map.fitBounds(mapBounds);
-
-    // 加载当前国家的标记
-    loadCountryMarkers(currentCountry);
-
-    // 地图移动结束事件
-    map.on('moveend', function() {
-        // 保存用户状态
-        saveUserState();
-    });
-
-    // 鼠标移动事件，显示坐标
-    map.on('mousemove', function(e) {
-        document.getElementById('mouse-coordinates').textContent = 
-            '坐标: ' + e.latlng.lng.toFixed(0) + ', ' + e.latlng.lat.toFixed(0);
-    });
-
-    // 鼠标离开地图时清空坐标显示
-    map.on('mouseout', function() {
-        document.getElementById('mouse-coordinates').textContent = '';
-    });
 }
 
 // 切换国家
@@ -82,38 +43,59 @@ function switchCountry(country) {
             [countryConfig.y, countryConfig.x],
             [countryConfig.maxY, countryConfig.maxX]
         ];
-        
-        // 设置地图最大坐标值
-        const maxBounds = [
-            [0, 0],
-            [countryConfig.maxY, countryConfig.maxX]
-        ];
     
         // 添加本地地图图片
         L.imageOverlay(countryConfig.mapUrl, mapBounds).addTo(map);
     
         // 设置地图边界和视图
-        map.setMaxBounds(maxBounds);
+        map.setMaxBounds(mapBounds);
         map.fitBounds(mapBounds);
         
-        // 设置地图的最小和最大缩放级别
-        map.setMinZoom(countryConfig.minZoom);
-        map.setMaxZoom(countryConfig.maxZoom);
-    
         // 延迟加载国家标记，确保地图已更新
         setTimeout(function() {
             loadCountryMarkers(country);
         }, 300);
-    
+        let mouseCoordinates = document.getElementById('mouse-coordinates');
         // 重新绑定鼠标移动事件，显示坐标
         map.off('mousemove').on('mousemove', function(e) {
-            document.getElementById('mouse-coordinates').textContent = 
-                '坐标: ' + e.latlng.lng.toFixed(0) + ', ' + e.latlng.lat.toFixed(0);
+            // 检查坐标是否在有效范围内
+            if (countryConfig && 
+                e.latlng.lng >= 0 && e.latlng.lng <= countryConfig.maxX &&
+                e.latlng.lat >= 0 && e.latlng.lat <= countryConfig.maxY) {
+                mouseCoordinates.style.display = 'block';
+                mouseCoordinates.textContent = 
+                    '坐标: ' + 
+                    e.latlng.lng.toFixed(0) + ', ' + e.latlng.lat.toFixed(0);
+            } else {
+                // 坐标超出范围时隐藏控件
+                mouseCoordinates.style.display = 'none';
+                mouseCoordinates.textContent = '';
+            }
         });
     
         // 鼠标离开地图时清空坐标显示
         map.off('mouseout').on('mouseout', function() {
-            document.getElementById('mouse-coordinates').textContent = '';
+            mouseCoordinates.style.display = 'none';
+            mouseCoordinates.textContent = '';
+        });
+        
+        // 鼠标点击事件，复制坐标到剪贴板
+        // map.off('mouseup').on('mouseup', function(e) {
+        //     const textToCopy = mouseCoordinates.textContent;
+        //     if (textToCopy) {
+        //         // 提取坐标部分，去除'坐标:'前缀
+        //         const coordinates = textToCopy.replace('坐标: ', '');
+        //         navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
+        //             console.log('坐标已复制到剪贴板');
+        //         }).catch(err => {
+        //             console.error('复制失败:', err);
+        //         });
+        //     }
+        // });
+        // 地图移动结束事件
+        map.on('moveend', function() {
+            // 保存用户状态
+            saveUserState();
         });
     } else {
         console.error('未找到国家配置:', country);
@@ -196,7 +178,7 @@ function addMachineMarker(machine) {
     // 抽奖机图标
     const icon = L.icon({
         iconUrl: 'src/img/icons/抽奖机.png',
-        iconSize: [30, 30],
+        iconSize: [18, 18],
         iconAnchor: [15, 15]
     });
 
@@ -230,8 +212,6 @@ function getCountryConfig(country) {
     const countryConfigs = {
         '森之国': {
             center: [114, 93], // 地图中心坐标
-            minZoom: 2,  // 最小缩小倍数
-            maxZoom: 6,  // 最大放大倍数
             mapUrl: 'src/img/森之国.jpg', // 本地地图图片路径
             x: -1,
             y: -1,
@@ -240,8 +220,6 @@ function getCountryConfig(country) {
         },
         '山之国': {
             center: [136.5, 104.5], // 地图中心坐标
-            minZoom: 1,  // 最小缩小倍数
-            maxZoom: 10, // 最大放大倍数
             mapUrl: 'src/img/山之国.jpg', // 本地地图图片路径
             x: -1,
             y: -1,
@@ -250,18 +228,14 @@ function getCountryConfig(country) {
         },
         '泽之国': {
             center: [500, 500], // 地图中心坐标
-            minZoom: 1,  // 最小缩小倍数
-            maxZoom: 10, // 最大放大倍数
             mapUrl: 'src/img/泽之国.jpg', // 本地地图图片路径
             x: 20,
             y: 12,
-            maxX: 1000,
-            maxY: 1000
+            maxX: 235,
+            maxY: 244
         },
         '龙之国': {
             center: [110, 130], // 地图中心坐标
-            minZoom: 1,  // 最小缩小倍数
-            maxZoom: 8,  // 最大放大倍数
             mapUrl: 'src/img/龙之国.jpg', // 本地地图图片路径
             x: 19,
             y: 12,

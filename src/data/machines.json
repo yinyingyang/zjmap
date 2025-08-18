@@ -105,10 +105,10 @@
     "龙之国": [
         {
             "machineId": "mach4",
-            "name": "龙之抽奖机",
+            "name": "丹霞林抽奖机",
             "city": "龙之国",
-            "x": 0,
-            "y": 0,
+            "x": 71,
+            "y": 112,
             "prizes": [
                 {
                     "prizeId": "prize15",

@@ -346,6 +346,42 @@ main {
     display: none !important;
 }
 
+/* 说明框样式 */
+.info-box {
+    background-color: #f0f8ff;
+    border: 1px solid #3a5a78;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    bottom: 20px;
+    left: 20px;
+    width: 310px;
+    z-index: 1001;
+    position: absolute;
+}
+.sidebar.open + .info-box {
+    position: fixed;
+}
+.sidebar.open ~ .info-box {
+    position: absolute;
+}
+.info-box h3 {
+    color: #3a5a78;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.info-box p {
+    margin: 5px 0;
+}
+
+.info-box li {
+    margin: 5px 0;
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
 /* 模态框样式 */
 .modal {
     display: none;

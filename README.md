@@ -12,7 +12,6 @@
     - `resources.json`: 资源点数据
     - `machines.json`: 抽奖机数据
   - `img/`: 图片资源
-- `docs/`: 文档目录
 
 
 ## 许可证
