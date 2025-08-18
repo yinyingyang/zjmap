@@ -239,14 +239,14 @@ function getCountryConfig(country) {
             maxY: 187.5
         },
         '山之国': {
-            center: [500, 500], // 地图中心坐标
+            center: [136.5, 104.5], // 地图中心坐标
             minZoom: 1,  // 最小缩小倍数
             maxZoom: 10, // 最大放大倍数
             mapUrl: 'src/img/山之国.jpg', // 本地地图图片路径
-            x: 20,
-            y: 12,
-            maxX: 1000,
-            maxY: 1000
+            x: -1,
+            y: -1,
+            maxX: 273,
+            maxY: 209
         },
         '泽之国': {
             center: [500, 500], // 地图中心坐标
