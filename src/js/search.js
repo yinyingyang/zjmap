@@ -16,12 +16,7 @@ function updateResourceTypeCheckboxes() {
     
     // 获取当前国家的资源类型
     if (resourcesData[currentCountry]) {
-        const resourceTypes = [];
-        resourcesData[currentCountry].forEach(resource => {
-            if (!resourceTypes.includes(resource.name)) {
-                resourceTypes.push(resource.name);
-            }
-        });
+        const resourceTypes = Object.keys(resourcesData[currentCountry]);
         
         // 获取保存的资源类型状态
         let savedResourceTypes = {};
@@ -55,9 +50,6 @@ function updateResourceTypeCheckboxes() {
             const img = document.createElement('img');
             img.src = `src/img/icons/${type}.png`;
             img.alt = type;
-            img.style.width = '20px';
-            img.style.height = '20px';
-            img.style.marginRight = '5px';
             
             // 创建文本节点
             // const textNode = document.createTextNode(type);
@@ -208,16 +200,18 @@ function searchResources(keyword) {
     // 只搜索当前国家的数据
     const currentCountry = getCurrentCountry();
     if (resourcesData[currentCountry]) {
-        resourcesData[currentCountry].forEach(resource => {
+        Object.keys(resourcesData[currentCountry]).forEach(resourceName => {
+            const resource = resourcesData[currentCountry][resourceName];
             // 检查资源类型是否被选中
-            if (!selectedResourceTypes.includes(resource.name)) {
+            if (!selectedResourceTypes.includes(resourceName)) {
                 return;
             }
 
             // 检查关键词是否匹配名称
-            if (resource.name.toLowerCase().includes(keyword)) {
+            if (resourceName.toLowerCase().includes(keyword)) {
                 results.push({
                     ...resource,
+                    name: resourceName,
                     country: currentCountry,
                     type: 'resource'
                 });

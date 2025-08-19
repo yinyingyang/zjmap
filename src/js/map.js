@@ -107,7 +107,7 @@ function loadCountryMarkers(country) {
     console.log('加载国家标记:', country);
     // 加载资源点标记
     if (resourcesData[country]) {
-        console.log('找到资源数据，数量:', resourcesData[country].length);
+        console.log('找到资源数据，数量:', Object.keys(resourcesData[country]).length);
         
         // 获取当前选中的资源类型
         const selectedResourceTypes = [];
@@ -123,9 +123,12 @@ function loadCountryMarkers(country) {
             return;
         }
         
-        resourcesData[country].forEach(resource => {
+        Object.keys(resourcesData[country]).forEach(resourceName => {
+            const resource = resourcesData[country][resourceName];
             // 检查资源类型是否被选中
-            if (selectedResourceTypes.includes(resource.name)) {
+            if (selectedResourceTypes.includes(resourceName)) {
+                // 为resource对象添加name属性
+                resource.name = resourceName;
                 addResourceMarker(resource);
             }
         });
@@ -146,6 +149,8 @@ function loadCountryMarkers(country) {
 
 // 添加资源点标记
 function addResourceMarker(resource) {
+    // 现在resource对象包含name属性，由loadCountryMarkers函数添加
+    
     const icon = L.icon({
         iconUrl: `src/img/icons/${resource.name}.png`,
         iconSize: [30, 30],

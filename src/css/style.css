@@ -241,6 +241,8 @@ main {
 
 .resource-type-checkbox img {
     vertical-align: middle;
+    width: 20px;
+    height: 20px;
     margin-right: 5px;
 }
 
