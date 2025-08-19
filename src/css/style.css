@@ -78,8 +78,19 @@ body {
     padding: 15px;
 }
 
-.sidebar-content .city-selector {
+.sidebar-content .selectors-container {
+    display: flex;
+    gap: 20px;
     margin-bottom: 20px;
+}
+
+.sidebar-content .country-selector-column,
+.sidebar-content .resource-selector-column {
+    flex: 1;
+}
+
+.sidebar-content .city-selector {
+    margin-bottom: 0;
 }
 
 .sidebar-content .search-container {
@@ -214,6 +225,25 @@ main {
     gap: 5px;
 }
 
+/* 资源类型复选框样式 */
+.resource-type-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resource-type-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.resource-type-checkbox img {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
 #city {
     padding: 8px;
     border-radius: 4px;
@@ -289,19 +319,6 @@ main {
     margin-bottom: 1rem;
 }
 
-.resource-type-checkboxes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.resource-type-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 14px;
-}
-
 .resource-type-checkbox input[type="checkbox"] {
     margin: 0;
 }
@@ -354,15 +371,15 @@ main {
     padding: 15px;
     margin-top: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    bottom: 20px;
+    /* bottom: 20px;
     left: 20px;
     width: 310px;
     z-index: 1001;
-    position: absolute;
+    position: absolute; */
 }
-.sidebar.open + .info-box {
+/* .sidebar.open + .info-box {
     position: fixed;
-}
+} */
 .sidebar.open ~ .info-box {
     position: absolute;
 }

@@ -61,7 +61,7 @@ function loadUserState() {
         userState = {
         lastCountry: '森之国',
         lastCenter: [0, 0],
-        lastZoom: 10,
+        lastZoom: 5,
         claimedPrizes: {}
     };
     currentCountry = '森之国';

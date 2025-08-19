@@ -80,18 +80,18 @@ function switchCountry(country) {
         });
         
         // 鼠标点击事件，复制坐标到剪贴板
-        // map.off('mouseup').on('mouseup', function(e) {
-        //     const textToCopy = mouseCoordinates.textContent;
-        //     if (textToCopy) {
-        //         // 提取坐标部分，去除'坐标:'前缀
-        //         const coordinates = textToCopy.replace('坐标: ', '');
-        //         navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
-        //             console.log('坐标已复制到剪贴板');
-        //         }).catch(err => {
-        //             console.error('复制失败:', err);
-        //         });
-        //     }
-        // });
+        map.off('mouseup').on('mouseup', function(e) {
+            const textToCopy = mouseCoordinates.textContent;
+            if (textToCopy) {
+                // 提取坐标部分，去除'坐标:'前缀
+                const coordinates = textToCopy.replace('坐标: ', '');
+                navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
+                    console.log('坐标已复制到剪贴板');
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            }
+        });
         // 地图移动结束事件
         map.on('moveend', function() {
             // 保存用户状态
@@ -148,8 +148,8 @@ function loadCountryMarkers(country) {
 function addResourceMarker(resource) {
     const icon = L.icon({
         iconUrl: `src/img/icons/${resource.name}.png`,
-        iconSize: [50, 50],
-        iconAnchor: [25, 25]
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
     });
 
     // 遍历坐标列表，为每个坐标创建标记

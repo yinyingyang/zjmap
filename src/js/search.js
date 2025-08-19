@@ -51,7 +51,20 @@ function updateResourceTypeCheckboxes() {
         }
             
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(type));
+            // 创建图片元素
+            const img = document.createElement('img');
+            img.src = `src/img/icons/${type}.png`;
+            img.alt = type;
+            img.style.width = '20px';
+            img.style.height = '20px';
+            img.style.marginRight = '5px';
+            
+            // 创建文本节点
+            // const textNode = document.createTextNode(type);
+            
+            // 将图片和文本添加到label中
+            label.appendChild(img);
+            // label.appendChild(textNode);
             checkboxesContainer.appendChild(label);
         });
         

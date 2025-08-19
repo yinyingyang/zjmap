@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="src/css/leaflet.css" />
     <script src="src/js/leaflet.js"></script>
 </head>
+
 <body>
     <div class="container">
         <!-- 侧边栏切换按钮 -->
@@ -20,16 +22,26 @@
                 <button id="close-sidebar" class="close-sidebar">&times;</button>
             </div>
             <div class="sidebar-content">
-                <div class="city-selector">
-                        <label>选择国家:</label>
-                        <div id="country-radio-group">
-                            <label><input type="radio" name="country" value="森之国"> 森之国</label>
-                            <label><input type="radio" name="country" value="山之国"> 山之国</label>
-                            <label><input type="radio" name="country" value="泽之国"> 泽之国</label>
-                            <label><input type="radio" name="country" value="龙之国"> 龙之国</label>
+                <div class="selectors-container">
+                    <div class="country-selector-column">
+                        <h3>国家</h3>
+                        <div class="city-selector">
+                            <div id="country-radio-group">
+                                <label><input type="radio" name="country" value="森之国"> 森之国</label>
+                                <label><input type="radio" name="country" value="山之国"> 山之国</label>
+                                <label><input type="radio" name="country" value="泽之国"> 泽之国</label>
+                                <label><input type="radio" name="country" value="龙之国"> 龙之国</label>
+                            </div>
                         </div>
                     </div>
-                
+                    <div class="resource-selector-column">
+                        <h3>资源</h3>
+                        <div id="resource-type-checkboxes" class="resource-type-checkboxes">
+                            <!-- 资源类型复选框将在这里动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
                 <div class="search-container">
                     <h3>搜索</h3>
                     <div class="search-box">
@@ -47,58 +59,57 @@
                         <h4>搜索结果</h4>
                         <ul id="results-list"></ul>
                     </div>
-                    <div id="resource-type-checkboxes" class="resource-type-checkboxes">
-                    <!-- 资源类型复选框将在这里动态生成 -->
                 </div>
-            </div>
-            
-            <!-- 说明框 -->
-            <div class="info-box">
-                <h3>说明</h3>
-                <p>1. 开发过程中。。。</p>
-                <ul>
-                    <li>开发进度：地图已完成：森、山</li>
-                    <li>开发进度：坐标已完成：森</li>
-                </ul>
-                <p>2. 图片与坐标资源来源：<a href="https://www.taptap.cn/user/513028511" target="_blank">taptap@萌胡</a>、<a href="https://www.taptap.cn/user/17237478" target="_blank">taptap@棺姬</a></p>
-                <p>3. 在线经验计算：<a href="http://zjcs1.nyarot.com" target="_blank">zjcs1.nyarot.com</a></p>
-                <p>4. 本网页作者：子疯<br>5. 项目仓库：<a href="https://github.com/yinyingyang/zjmap" target="_blank">github.com/yinyingyang/zjmap</a></p>
-            </div>
+
+                <!-- 说明框 -->
+                <div class="info-box">
+                    <h3>说明</h3>
+                    <p>1. 开发过程中。。。</p>
+                    <ul>
+                        <li>开发进度：地图已完成：森、山</li>
+                        <li>开发进度：坐标已完成：森</li>
+                    </ul>
+                    <p>2. 图片与坐标资源来源：<a href="https://www.taptap.cn/user/513028511" target="_blank">taptap@萌胡</a>、<a
+                            href="https://www.taptap.cn/user/17237478" target="_blank">taptap@棺姬</a></p>
+                    <p>3. 在线经验计算：<a href="http://zjcs1.nyarot.com" target="_blank">zjcs1.nyarot.com</a></p>
+                    <p>4. 本网页作者：子疯<br>5. 项目仓库：<a href="https://github.com/yinyingyang/zjmap"
+                            target="_blank">github.com/yinyingyang/zjmap</a></p>
+                </div>
             </div>
         </div>
+    </div>
+
+    <main>
+        <div class="map-container">
+            <div id="map"></div>
+            <div id="mouse-coordinates" class="mouse-coordinates"></div>
+            <!-- 右下角缩放控制 -->
+            <div class="bottom-right-zoom-controls">
+                <button id="zoom-in">+</button>
+                <button id="zoom-out">-</button>
+            </div>
         </div>
 
-        <main>
-            <div class="map-container">
-                <div id="map"></div>
-                <div id="mouse-coordinates" class="mouse-coordinates"></div>
-                <!-- 右下角缩放控制 -->
-                <div class="bottom-right-zoom-controls">
-                    <button id="zoom-in">+</button>
-                    <button id="zoom-out">-</button>
-                </div>
+        <div id="resource-detail" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="resource-name"></h2>
+                <p><strong>类型:</strong> <span id="resource-type"></span></p>
+                <p><strong>数量:</strong> <span id="resource-amount"></span></p>
             </div>
+        </div>
 
-            <div id="resource-detail" class="modal">
-                <div class="modal-content">
-                    <span class="close-button">&times;</span>
-                    <h2 id="resource-name"></h2>
-                    <p><strong>类型:</strong> <span id="resource-type"></span></p>
-                    <p><strong>数量:</strong> <span id="resource-amount"></span></p>
+        <div id="machine-detail" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="machine-name"></h2>
+                <div class="prizes-list">
+                    <h3>奖品列表</h3>
+                    <ul id="prizes-list"></ul>
                 </div>
             </div>
-
-            <div id="machine-detail" class="modal">
-                <div class="modal-content">
-                    <span class="close-button">&times;</span>
-                    <h2 id="machine-name"></h2>
-                    <div class="prizes-list">
-                        <h3>奖品列表</h3>
-                        <ul id="prizes-list"></ul>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
+    </main>
     </div>
 
     <script src="src/js/map.js"></script>
@@ -106,4 +117,5 @@
     <script src="src/js/data.js"></script>
     <script src="src/js/main.js"></script>
 </body>
+
 </html>
