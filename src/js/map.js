@@ -7,7 +7,7 @@ function initMap() {
         zoomControl: false, 
         attributionControl: false,
         crs: L.CRS.Simple,  // 使用简单坐标系统
-        minZoom: 2,  // 最小缩小倍数
+        minZoom: 1,  // 最小缩小倍数
         maxZoom: 6   // 最大放大倍数
     }).setView(userState.lastCenter, userState.lastZoom);
 
@@ -80,18 +80,18 @@ function switchCountry(country) {
         });
         
         // 鼠标点击事件，复制坐标到剪贴板
-        map.off('mouseup').on('mouseup', function(e) {
-            const textToCopy = mouseCoordinates.textContent;
-            if (textToCopy) {
-                // 提取坐标部分，去除'坐标:'前缀
-                const coordinates = textToCopy.replace('坐标: ', '');
-                navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
-                    console.log('坐标已复制到剪贴板');
-                }).catch(err => {
-                    console.error('复制失败:', err);
-                });
-            }
-        });
+        // map.off('mouseup').on('mouseup', function(e) {
+        //     const textToCopy = mouseCoordinates.textContent;
+        //     if (textToCopy) {
+        //         // 提取坐标部分，去除'坐标:'前缀
+        //         const coordinates = textToCopy.replace('坐标: ', '');
+        //         navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
+        //             console.log('坐标已复制到剪贴板');
+        //         }).catch(err => {
+        //             console.error('复制失败:', err);
+        //         });
+        //     }
+        // });
         // 地图移动结束事件
         map.on('moveend', function() {
             // 保存用户状态
@@ -220,8 +220,8 @@ function getCountryConfig(country) {
             mapUrl: 'src/img/森之国.jpg', // 本地地图图片路径
             x: -1,
             y: -1,
-            maxX: 227.5,
-            maxY: 187.5
+            maxX: 227,
+            maxY: 187
         },
         '山之国': {
             center: [136.5, 104.5], // 地图中心坐标
@@ -232,12 +232,12 @@ function getCountryConfig(country) {
             maxY: 209
         },
         '泽之国': {
-            center: [500, 500], // 地图中心坐标
+            center: [125, 125], // 地图中心坐标
             mapUrl: 'src/img/泽之国.jpg', // 本地地图图片路径
-            x: 20,
-            y: 12,
-            maxX: 235,
-            maxY: 244
+            x: 6,
+            y: 4,
+            maxX: 252,//225
+            maxY: 240//233
         },
         '龙之国': {
             center: [110, 130], // 地图中心坐标
