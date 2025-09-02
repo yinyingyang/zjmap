@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本阅读器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 5px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .control-panel {
+            margin-bottom: 20px;
+            z-index: 201;
+        }
+        input[type="text"], input[type="file"], button {
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 透明翻页层样式 */
+        #content-container {
+            position: relative;
+            min-height: 400px;
+        }
+        .page-turner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            pointer-events: none;
+        }
+        .page-turner-left,
+        .page-turner-right {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .page-turner-left {
+            left: 0;
+            background-color: #ffffff;
+        }
+        .page-turner-right {
+            right: 0;
+            background-color: #ffffff;
+        }
+        .page-turner-left:hover,
+        .page-turner-right:hover {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <input type="file" id="fileInput" accept=".txt">
+            <span id="fileName"></span>
+            <button id="clearCookie">清除阅读记录</button>
+        </div>
+        
+        <div id="content-container" style="position: relative;">
+            <div id="content"></div>
+            
+            <!-- 透明翻页层 -->
+            <div class="page-turner">
+                <div class="page-turner-left" id="pageTurnerLeft"></div>
+                <div class="page-turner-right" id="pageTurnerRight"></div>
+            </div>
+        </div>
+        
+        <div class="status">
+            当前阅读行数: <span id="currentLine">0</span>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const contentDiv = document.getElementById('content');
+        const currentLineSpan = document.getElementById('currentLine');
+        const clearCookieBtn = document.getElementById('clearCookie');
+        const pageTurnerLeft = document.getElementById('pageTurnerLeft');
+        const pageTurnerRight = document.getElementById('pageTurnerRight');
+        
+        // 当前加载的文本内容（按行存储）
+        let textLines = [];
+        // 当前加载的文件名
+        let currentFileName = '';
+        // 当前已显示的最大行数
+        let displayedLinesCount = 0;
+        // 每批加载的行数
+        const batchSize = 100;
+        
+        // 读取文本文件并显示内容
+        function readTextFile(file) {
+            currentFileName = file.name;
+            fileName.textContent = `当前文件: ${currentFileName}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                let text = '';
+                
+                // 始终使用gbk编码读取文件
+                try {
+                    if (typeof TextDecoder !== 'undefined') {
+                        text = new TextDecoder('gbk').decode(arrayBuffer);
+                        // 移除可能的BOM字符
+                        if (text.charCodeAt(0) === 0xFEFF) {
+                            text = text.slice(1);
+                        }
+                    }
+                    
+                    textLines = text.split('\n');
+                    // 重置显示的行数
+                    displayedLinesCount = 0;
+                    displayContent();
+                } catch (error) {
+                    console.error('读取文件时出错:', error);
+                    textLines = [];
+                    displayedLinesCount = 0;
+                    displayContent();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // 显示文本内容
+        function displayContent() {
+            // 清空内容
+            contentDiv.innerHTML = '';
+            displayedLinesCount = 0;
+            
+            // 从localStorage中获取上次阅读的行数
+            const storageKey = `reading_progress_${currentFileName}`;
+            const startLine = parseInt(localStorage.getItem(storageKey)) || 0;
+            
+            // 计算需要显示的行数范围
+            // 初始显示100行，但要考虑上次阅读的位置
+            let endLine = Math.min(startLine + batchSize, textLines.length);
+            console.log('startLine', startLine, 'endLine', endLine);
+            // 显示文本内容，每行一个div元素，便于跟踪行号
+            for (let i = startLine; i < endLine; i++) {
+                appendLineToContent(i);
+            }
+            
+            // 更新当前行号显示
+            updateCurrentLine();
+        }
+        
+        // 将一行文本添加到内容区域
+        function appendLineToContent(lineNumber) {
+            if (lineNumber < textLines.length && !contentDiv.querySelector(`[data-line-number="${lineNumber}"]`)) {
+                const lineDiv = document.createElement('div');
+                lineDiv.textContent = textLines[lineNumber];
+                lineDiv.dataset.lineNumber = lineNumber;
+                contentDiv.appendChild(lineDiv);
+                displayedLinesCount = Math.max(displayedLinesCount, lineNumber + 1);
+            }
+        }
+        
+        // 更新当前行号
+        function updateCurrentLine() {
+            if (textLines.length === 0) return;
+            
+            // 获取当前页面滚动位置
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+            const lineElements = contentDiv.querySelectorAll('div[data-line-number]');
+            
+            let topLineNumber = 0;
+            let closestDistance = Infinity;
+            
+            // 遍历所有行元素，找到最接近当前滚动位置的行
+            for (let i = 0; i < lineElements.length; i++) {
+                const lineElement = lineElements[i];
+                const lineRect = lineElement.getBoundingClientRect();
+                const lineNumber = parseInt(lineElement.dataset.lineNumber);
+                
+                // 计算行顶部与页面顶部的距离
+                const distanceFromTop = lineRect.top + scrollPosition;
+                
+                // 找到最接近当前滚动位置的行（且在视口上方或内部）
+                const distance = Math.abs(distanceFromTop - scrollPosition);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    topLineNumber = lineNumber;
+                }
+            }
+            
+            console.log('topLineNumber', topLineNumber);
+            // 更新显示
+            for (let i = displayedLinesCount; i < topLineNumber+batchSize; i++) {
+                appendLineToContent(i);
+            }
+            currentLineSpan.textContent = topLineNumber;
+            
+            // 保存到localStorage
+            if (currentFileName) {
+                const storageKey = `reading_progress_${currentFileName}`;
+                localStorage.setItem(storageKey, topLineNumber);
+            }
+        }
+
+        // 定义滚动偏移量变量
+        SCROLL_OFFSET = 60;
+        
+        function pageUp() {
+            // 向上翻一页
+            window.scrollBy(0,  SCROLL_OFFSET - window.innerHeight);
+        }
+        
+        function pageDown() {
+            // 向下翻一页
+            window.scrollBy(0, window.innerHeight - SCROLL_OFFSET);
+        }
+        
+        // 绑定翻页按钮事件
+        pageTurnerLeft.addEventListener('click', pageUp);
+        pageTurnerRight.addEventListener('click', pageDown);
+        
+        // 事件监听器
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                readTextFile(e.target.files[0]);
+            }
+        });
+        
+        // 滚动事件监听
+        window.addEventListener('scroll', updateCurrentLine);
+        contentDiv.addEventListener('scroll', updateCurrentLine);
+        
+        document.addEventListener('keydown', function (event) {
+            console.log('keydown', event.key);
+            // 检查按下的是否是上方向键
+            if (event.key === 'ArrowUp') {
+                // 向上翻一页
+                pageUp();
+            }
+            // 检查按下的是否是下方向键
+            else if (event.key === 'ArrowDown') {
+                // 向下翻一页
+                pageDown();
+            }
+        })
+        // 清除阅读记录按钮
+        clearCookieBtn.addEventListener('click', function() {
+            if (currentFileName) {
+                const storageKey = `reading_progress_${currentFileName}`;
+                localStorage.removeItem(storageKey);
+                alert('阅读记录已清除');
+                currentLineSpan.textContent = '0';
+            }
+        });
+        
+        // 窗口大小改变时也需要更新行号
+        window.addEventListener('resize', updateCurrentLine);
+
+        SCROLL_OFFSET = 60
+    </script>
+</body>
+</html>
