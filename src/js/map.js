@@ -58,14 +58,16 @@ function switchCountry(country) {
         let mouseCoordinates = document.getElementById('mouse-coordinates');
         // 重新绑定鼠标移动事件，显示坐标
         map.off('mousemove').on('mousemove', function(e) {
+            x=e.latlng.lng;
+            y=e.latlng.lat;
             // 检查坐标是否在有效范围内
             if (countryConfig && 
-                e.latlng.lng >= 0 && e.latlng.lng <= countryConfig.maxX &&
-                e.latlng.lat >= 0 && e.latlng.lat <= countryConfig.maxY) {
+                x >= countryConfig.x && x <= countryConfig.maxX &&
+                y >= countryConfig.y && y <= countryConfig.maxY) {
                 mouseCoordinates.style.display = 'block';
                 mouseCoordinates.textContent = 
                     '坐标: ' + 
-                    e.latlng.lng.toFixed(0) + ', ' + e.latlng.lat.toFixed(0);
+                    x.toFixed(0) + ', ' + y.toFixed(0);
             } else {
                 // 坐标超出范围时隐藏控件
                 mouseCoordinates.style.display = 'none';
@@ -79,19 +81,21 @@ function switchCountry(country) {
             mouseCoordinates.textContent = '';
         });
         
-        // 鼠标点击事件，复制坐标到剪贴板
-        // map.off('mouseup').on('mouseup', function(e) {
-        //     const textToCopy = mouseCoordinates.textContent;
-        //     if (textToCopy) {
-        //         // 提取坐标部分，去除'坐标:'前缀
-        //         const coordinates = textToCopy.replace('坐标: ', '');
-        //         navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
-        //             console.log('坐标已复制到剪贴板');
-        //         }).catch(err => {
-        //             console.error('复制失败:', err);
-        //         });
-        //     }
-        // });
+        // 本地调试时添加鼠标点击事件，复制坐标到剪贴板
+        if(/localhost|127.0.0.1/.test(window.location.href)) {
+            map.off('mouseup').on('mouseup', function(e) {
+                const textToCopy = mouseCoordinates.textContent;
+                if (textToCopy) {
+                    // 提取坐标部分，去除'坐标:'前缀
+                    const coordinates = textToCopy.replace('坐标: ', '');
+                    navigator.clipboard.writeText(`,[${coordinates}]`).then(() => {
+                        console.log('坐标已复制到剪贴板');
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                    });
+                }
+            });
+        }
         // 地图移动结束事件
         map.on('moveend', function() {
             // 保存用户状态
@@ -244,7 +248,7 @@ function getCountryConfig(country) {
             mapUrl: 'src/img/龙之国.jpg', // 本地地图图片路径
             x: 19,
             y: 12,
-            maxX: 265,
+            maxX: 260,
             maxY: 280
         }
     };
