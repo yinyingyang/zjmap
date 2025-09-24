@@ -157,8 +157,8 @@ function addResourceMarker(resource) {
     
     const icon = L.icon({
         iconUrl: `src/img/icons/${resource.name}.png`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
     });
 
     // 遍历坐标列表，为每个坐标创建标记
@@ -246,10 +246,10 @@ function getCountryConfig(country) {
         '龙之国': {
             center: [110, 130], // 地图中心坐标
             mapUrl: 'src/img/龙之国.jpg', // 本地地图图片路径
-            x: 19,
-            y: 12,
-            maxX: 260,
-            maxY: 280
+            x: 0,
+            y: 0,
+            maxX: 258,
+            maxY: 283
         }
     };
 

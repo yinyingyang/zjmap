@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>最强找茬</title>
+    <style>
+        body {
+            position: relative;
+            background-color: white;
+        }
+
+        * {
+            margin: 0 auto;
+        }
+
+        #c1 {
+            margin-left: 40px;
+        }
+
+        #c1,
+        #c2 {
+            width: 40px;
+            height: 40px;
+            background-color: red;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+
+        
+        #tbox {
+            font-size: 0; /* 消除inline-block元素间的间隙 */
+            /* background-color: black; */
+            overflow: hidden; /* 防止内容溢出 */
+        }
+        
+        #tbox div {
+            display: inline-block;
+        }
+        
+        p{
+            font-size: 0; /* 消除字体大小影响 */
+        }
+        
+        #tbox div span {
+            display: inline-block; /* 使用inline-block确保在同一行 */
+            border-top-width: 1px;
+            border-left-width: 1px;
+            border-color: black;
+            border-top-style: solid;
+            border-left-style: solid;
+            text-align: center;
+            font-weight: bold;
+            margin: 0; /* 消除边距 */
+            padding: 0; /* 消除内边距 */
+            vertical-align: top; /* 确保顶部对齐 */
+        }
+
+        input {
+            height: 40px;
+            width: 80px;
+            /*cursor: pointer;*/
+            position: relative;
+            /*圆角属性*/
+            border-radius: 5px;
+            vertical-align: middle;
+            margin: 10px 5px 0 5px;
+        }
+
+        #cbox {
+            margin-left: 100px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        #t1,
+        #t2 {
+            float: left;
+            width: 345px;
+            margin-top: 10px;
+            height: 345px;
+            padding: 5px;
+            border-radius: 5px;
+            padding-top: 25px;
+        }
+
+        .tp {
+            /*background:url(../images/bgd.jpg) 100% 100% no-repeat;*/
+            background-size: cover;
+        }
+
+        .selectp {
+            /*border-block-color: #000000;*/
+            box-shadow: inset 0 0 0 1px #000000;
+        }
+    </style>
+
+
+    <!--<style>-->
+    <!--    div{-->
+    <!--        width:200px;-->
+    <!--        height:200px;-->
+    <!--	}-->
+    <!--	span{-->
+    <!--        width:20px;-->
+    <!--        height:20px;-->
+    <!--	}-->
+    <!--	-->
+    <!--</style>-->
+</head>
+
+<body>
+    <div id="cbox">
+        <input type="number" id="inputx" value="2" alt="2到100的数字" min="2" max="100">
+        <input type="button" onClick="generateMode=1;t2.style.height = t1.style.height = `${345*generateMode}px`;create()" value="生成" />
+        <input type="button" onClick="generateMode=2;t2.style.height = t1.style.height = `${345*generateMode}px`;create()" value="生成双倍" />
+        <!-- <input type="button" onClick="wind()" value="对比" /> -->
+        <span id="c1"></span>
+        <span id="c2"></span>
+    </div>
+    <div id="tbox">
+        <div id="t1"></div>
+        <div id="t2"></div>
+    </div>
+</body>
+<script src="../src/js/jquery.js"></script>
+<script>
+
+    // 存储按钮状态的变量，1表示生成，2表示生成双倍
+    var generateMode = document.body.clientHeight > document.body.clientWidth ? 2 : 1
+
+    var colorlist = [//颜色列表
+        //  '#ffffff',
+        '#ff0000',
+        '#00ff00',
+        '#0000ff',
+        '#ffff00',
+        '#ff00ff',
+        '#00ffff'
+    ]
+    //生成随机色
+    function getRandomColor() {
+        // return '#'+('00000'+ (Math.random()*0x1000000<<0).toString(16)).substr(-6);
+        return colorlist[Math.floor(Math.random() * colorlist.length)]
+    }
+    // 16进制颜色值的正则
+    //var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+    String.prototype.colorRgb = function () {
+
+        // 把颜色值变成小写
+        var color = this.toLowerCase();
+        //if (reg.test(color)) {
+        // 如果只有三位的值，需变成六位，如：#fff => #ffffff
+        //if (color.length === 4) {
+        //  var colorNew = "#";
+        //  for (var i = 1; i < 4; i += 1) {
+        //	colorNew += color.slice(i, i + 1).concat(color.slice(i, i + 1));
+        // }
+        // color = colorNew;
+        //}
+        // 处理六位的颜色值，转为RGB
+        var colorChange = [];
+        for (var i = 1; i < 7; i += 2) {
+            colorChange.push(parseInt("0x" + color.slice(i, i + 2)));
+        }
+        return "rgb(" + colorChange.join(", ") + ")";
+        //} else {
+        //return color;
+        //}
+    };
+    //生成两个拼图
+    function create() {
+        
+        x = inputx.value * 1
+        y = generateMode * x
+        if (x < 2) return
+        if (x > 100) { x = 100; inputx.value = 100 }
+        t2.innerHTML = t1.innerHTML = ""
+        for (i = 0; i < y; ++i) {
+            let p = document.createElement("p");
+            for (j = 0; j < x; ++j) {
+                let span = document.createElement("span");
+                span.id = `taax${j}y${i}`
+                // tr.appendChild(td)
+                span.style.backgroundColor = getRandomColor();
+                // td.style.borderBlockColor = c;
+                p.appendChild(span);
+                
+            }
+            //增加一个换行
+            // let br = document.createElement("p");
+            t1.appendChild(p);
+        }
+        b = t1.innerHTML
+        b = b.replaceAll('taa', 'tbb')
+        t2.innerHTML = b;
+        //随机取一个块
+        isx = Math.floor(Math.random() * x)
+        isy = Math.floor(Math.random() * y)
+        console.log(`x:${isx}，y:${isy}`)
+        hua = window[`tbbx${isx}y${isy}`]
+        yuanColor = window[`taax${isx}y${isy}`].style.backgroundColor
+        //换个色
+        do {
+            rc = getRandomColor()
+        } while (yuanColor === rc.colorRgb());//跟之前相同，重新换---出现了换完还是原来的色的情况，查下
+        hua.style.backgroundColor = rc;
+
+        $('#tbox p span').css('width', 345 / x - 1 + 'px').css('height', 345 / x - 1 + 'px')
+        // 不需要固定p标签高度，让它根据内容自动调整
+        // $('#tbox p').css('height', 345 / x - 1 + 'px')
+
+        var p = $('span')
+        p.on('mousemove', p => {
+            p = p.currentTarget.id.substr(3)
+            $('.selectp').removeClass('selectp')
+            $('#taa' + p).addClass('selectp')
+            $('#tbb' + p).addClass('selectp')
+            c1.style.backgroundColor = window['taa' + p].style.backgroundColor
+            c2.style.backgroundColor = window['tbb' + p].style.backgroundColor
+        })
+        p.on('mousedown', p => {
+            wind()
+        })
+        //
+        c1.style.backgroundColor = c2.style.backgroundColor = '#000000'
+    }
+    function wind() {
+        if (c1.style.backgroundColor !== c2.style.backgroundColor) {//alert('对啦')
+            inputx.value++
+            create()
+        } else {
+            //alert('不对哦')
+        }
+    }
+
+    inputx.addEventListener('change', create)
+
+    create();
+    // $('body').on('keydown', k => {
+    // 		if(k.key=='Control')wind()
+    // 	})
+</script>
+
+</html>

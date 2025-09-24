@@ -13,7 +13,6 @@
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 800px;
             margin: 0 auto;
             background-color: #fff;
             padding: 10px;
@@ -22,10 +21,20 @@
         #content {
             white-space: pre-wrap;
             word-wrap: break-word;
+            font-size: 30px;
         }
         .control-panel {
             margin-bottom: 20px;
             z-index: 201;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            position: relative;
+            pointer-events: auto;
+        }
+        
+        .control-panel.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         input[type="text"], input[type="file"], button {
             padding: 8px;
@@ -77,25 +86,21 @@
 </head>
 <body>
     <div class="container">
-        <div class="control-panel">
-            <input type="file" id="fileInput" accept=".txt">
-            <span id="fileName"></span>
-            <button id="clearCookie">清除阅读记录</button>
-        </div>
-        
         <div id="content-container" style="position: relative;">
             <div id="content"></div>
             
             <!-- 透明翻页层 -->
             <div class="page-turner">
+                <div class="control-panel">
+                    <input type="file" id="fileInput" accept=".txt">
+                    <span id="fileName"></span>
+                    <button id="clearCookie">清除阅读记录</button>
+                </div>
                 <div class="page-turner-left" id="pageTurnerLeft"></div>
                 <div class="page-turner-right" id="pageTurnerRight"></div>
             </div>
         </div>
         
-        <div class="status">
-            当前阅读行数: <span id="currentLine">0</span>
-        </div>
     </div>
 
     <script>
@@ -103,11 +108,11 @@
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
         const contentDiv = document.getElementById('content');
-        const currentLineSpan = document.getElementById('currentLine');
         const clearCookieBtn = document.getElementById('clearCookie');
         const pageTurnerLeft = document.getElementById('pageTurnerLeft');
         const pageTurnerRight = document.getElementById('pageTurnerRight');
-        
+        const pageTurner=document.getElementsByClassName('page-turner')[0];
+        const controlPanel = document.querySelector('.control-panel');
         // 当前加载的文本内容（按行存储）
         let textLines = [];
         // 当前加载的文件名
@@ -115,7 +120,7 @@
         // 当前已显示的最大行数
         let displayedLinesCount = 0;
         // 每批加载的行数
-        const batchSize = 100;
+        const batchSize = 500;
         
         // 读取文本文件并显示内容
         function readTextFile(file) {
@@ -218,7 +223,6 @@
             for (let i = displayedLinesCount; i < topLineNumber+batchSize; i++) {
                 appendLineToContent(i);
             }
-            currentLineSpan.textContent = topLineNumber;
             
             // 保存到localStorage
             if (currentFileName) {
@@ -267,6 +271,11 @@
                 // 向下翻一页
                 pageDown();
             }
+            else if (event.key === 'Enter') {
+                // 原代码语法错误，推测是想切换 pageTurner 的显示状态
+                pageTurner.style.display = pageTurner.style.display === 'none' ? 'block' : 'none';
+                
+            }
         })
         // 清除阅读记录按钮
         clearCookieBtn.addEventListener('click', function() {
@@ -274,14 +283,67 @@
                 const storageKey = `reading_progress_${currentFileName}`;
                 localStorage.removeItem(storageKey);
                 alert('阅读记录已清除');
-                currentLineSpan.textContent = '0';
             }
         });
         
         // 窗口大小改变时也需要更新行号
         window.addEventListener('resize', updateCurrentLine);
 
-        SCROLL_OFFSET = 60
+        SCROLL_OFFSET = 100
+        
+        // 自动隐藏控制面板功能
+        let hideControlPanelTimer;
+        const HIDE_DELAY = 3000; // 3秒后自动隐藏
+        
+        // 显示控制面板
+        function showControlPanel() {
+            controlPanel.classList.remove('hidden');
+            
+            // 清除之前的定时器
+            if (hideControlPanelTimer) {
+                clearTimeout(hideControlPanelTimer);
+            }
+            
+            // 设置新的隐藏定时器
+            hideControlPanelTimer = setTimeout(hideControlPanel, HIDE_DELAY);
+        }
+        
+        // 隐藏控制面板
+        function hideControlPanel() {
+            controlPanel.classList.add('hidden');
+        }
+        
+        // 初始化时显示控制面板，并设置自动隐藏定时器
+        showControlPanel();
+        
+        // 监听鼠标移动事件，显示控制面板
+        document.addEventListener('mousemove', function(event) {
+            // 检查鼠标是否在控制面板区域附近
+            const rect = controlPanel.getBoundingClientRect();
+            const mouseNearControlPanel = 
+                event.clientY < rect.bottom + 50 && 
+                event.clientY > 0;
+            
+            if (mouseNearControlPanel) {
+                showControlPanel();
+            }
+        });
+        
+        // 当鼠标悬停在控制面板上时，保持显示
+        controlPanel.addEventListener('mouseenter', function() {
+            if (hideControlPanelTimer) {
+                clearTimeout(hideControlPanelTimer);
+            }
+        });
+        
+        // 当鼠标离开控制面板时，设置隐藏定时器
+        controlPanel.addEventListener('mouseleave', function() {
+            hideControlPanelTimer = setTimeout(hideControlPanel, HIDE_DELAY);
+        });
+        
+        // 当用户与控制面板交互时，重置隐藏定时器
+        controlPanel.addEventListener('click', showControlPanel);
+        fileInput.addEventListener('change', showControlPanel);
     </script>
 </body>
 </html>
