@@ -82,7 +82,7 @@
         "豆": {
             "resourceId": "res14",
             "city": "龙之国",
-            "coordinates": [[1,1], [1,1.5], [1.5,1]],
+            "coordinates": [[-40,1]],
             "refreshTime": 300
         },
         "笋": {

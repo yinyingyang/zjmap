@@ -441,6 +441,7 @@ main {
 .modal-content h2 {
     margin-bottom: 15px;
     color: #3a5a78;
+    text-align: center;
 }
 
 .prizes-list h3 {
@@ -449,29 +450,88 @@ main {
     color: #3a5a78;
 }
 
+/* 奖品网格样式 */
+.prizes-grid {
+    margin: 20px 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    gap: 2px;
+    margin-top: 20px;
+}
+
+.prize-cell {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    user-select: none;
+    padding: 8px;
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.prize-cell.empty {
+    background-color: transparent !important;
+    cursor: default !important;
+}
+
+.prize-cell.empty:hover {
+    background-color: transparent !important;
+    transform: none !important;
+}
+
+.prize-cell:hover {
+    background-color: #e9ecef;
+    transform: scale(1.05);
+}
+
+/* 已抽取的奖品样式 */
+.prize-cell.prize-claimed {
+    color: #adb5bd !important;
+    opacity: 0.7;
+}
+
+
+/* 奖品列表样式（兼容旧样式） */
 #prizes-list {
     list-style: none;
+    padding: 0;
+    margin: 20px 0;
 }
 
 #prizes-list li {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    transition: all 0.3s ease;
 }
 
-.prize-checkbox {
-    margin-left: 10px;
+#prizes-list li:hover {
+    background-color: #e9ecef;
 }
 
 .prize-unclaimed {
     color: #333;
+    font-weight: 500;
 }
 
-.prize-claimed {
-    color: #aaa;
-    text-decoration: line-through;
+.prize-checkbox {
+    margin-left: 10px;
+    transform: scale(1.2);
 }
 
 /* 底部样式 */
@@ -506,9 +566,6 @@ footer {
 }
 
 @media (max-width: 480px) {
-    #map {
-        height: 400px;
-    }
 
     nav ul {
         flex-direction: column;

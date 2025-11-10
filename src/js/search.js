@@ -115,6 +115,28 @@ function filterResourcesByType() {
         return;
     }
     
+    // 检查是否有新选中的资源类型需要加载
+    const loadedResourceTypes = new Set();
+    document.querySelectorAll('.resource-marker').forEach(marker => {
+        loadedResourceTypes.add(marker.getAttribute('data-type'));
+    });
+    
+    // 如果有新选中的资源类型未加载，重新加载国家标记
+    const hasNewResourceTypes = selectedResourceTypes.some(type => !loadedResourceTypes.has(type));
+    if (hasNewResourceTypes) {
+        // 清除现有资源标记（保留抽奖机标记）
+        document.querySelectorAll('.resource-marker').forEach(marker => {
+            const parent = marker.parentElement;
+            if (parent && parent._leaflet_id) {
+                map.removeLayer(parent._leaflet_id);
+            }
+        });
+        
+        // 重新加载国家标记
+        loadCountryMarkers(currentCountry);
+        return;
+    }
+    
     // 显示选中资源类型的资源点
     selectedResourceTypes.forEach(type => {
         document.querySelectorAll(`.resource-marker[data-type="${type}"]`).forEach(marker => {
@@ -186,37 +208,22 @@ function performSearch() {
 function searchResources(keyword) {
     let results = [];
 
-    // 获取当前选中的资源类型
-    const selectedResourceTypes = [];
-    document.querySelectorAll('.resource-type-checkbox input:checked').forEach(checkbox => {
-        selectedResourceTypes.push(checkbox.value);
-    });
+    // 搜索所有国家的数据（取消资源类型选中检查）
+    for (const country in resourcesData) {
+        if (resourcesData.hasOwnProperty(country)) {
+            Object.keys(resourcesData[country]).forEach(resourceName => {
+                const resource = resourcesData[country][resourceName];
 
-    // 如果没有选中的资源类型，直接返回空数组
-    if (selectedResourceTypes.length === 0) {
-        return results;
-    }
-
-    // 只搜索当前国家的数据
-    const currentCountry = getCurrentCountry();
-    if (resourcesData[currentCountry]) {
-        Object.keys(resourcesData[currentCountry]).forEach(resourceName => {
-            const resource = resourcesData[currentCountry][resourceName];
-            // 检查资源类型是否被选中
-            if (!selectedResourceTypes.includes(resourceName)) {
-                return;
-            }
-
-            // 检查关键词是否匹配名称
-            if (resourceName.toLowerCase().includes(keyword)) {
-                results.push({
-                    ...resource,
-                    name: resourceName,
-                    country: currentCountry,
-                    type: 'resource'
-                });
-            }
-        });
+                // 检查关键词是否匹配名称
+                if (resourceName.toLowerCase().includes(keyword)) {
+                    results.push({
+                        ...resource,
+                        name: resourceName,
+                        country: country,
+                    });
+                }
+            });
+        }
     }
 
     return results;
@@ -227,24 +234,38 @@ function searchPrizes(keyword) {
     let results = [];
 
     // 遍历所有国家的抽奖机
-    for (const country in machinesData) {
-        if (machinesData.hasOwnProperty(country)) {
-            machinesData[country].forEach(machine => {
-                machine.prizes.forEach(prize => {
-                    // 检查关键词是否匹配奖品名称或描述
-                    if (prize.name.toLowerCase().includes(keyword) || (prize.description && prize.description.toLowerCase().includes(keyword))) {
-                        results.push({
-                        ...prize,
-                        machineId: machine.machineId,
-                        machineName: machine.name,
-                        country: country,
-                        x: machine.x,
-                        y: machine.y,
-                        type: 'prize'
-                    });
+    if (machinesData.machines) {
+        for (const country in machinesData.machines) {
+            if (machinesData.machines.hasOwnProperty(country)) {
+                machinesData.machines[country].forEach(machine => {
+                    // 获取机器类型对应的奖品数据
+                    const machineType = machine.type;
+                    const typeData = machinesData.types[machineType];
+                    
+                    if (typeData && typeData.prizes) {
+                        typeData.prizes.forEach((prize, index) => {
+                            // 检查奖品是否已经被用户标记为已抽取
+                            const isClaimed = userState.claimedPrizes[machine.machineId] && userState.claimedPrizes[machine.machineId].includes(index);
+                            if (isClaimed) {
+                                return; // 跳过已标记的奖品
+                            }
+                            
+                            // 对于简化的奖品结构，我们只搜索奖品名称
+                            if (prize.toLowerCase().includes(keyword)) {
+                                results.push({
+                                name: prize,
+                                machineId: machine.machineId,
+                                machineName: machine.name,
+                                country: country,
+                                x: machine.x,
+                                y: machine.y,
+                                type: 'prize'
+                            });
+                            }
+                        });
                     }
                 });
-            });
+            }
         }
     }
 
@@ -262,36 +283,116 @@ function displaySearchResults(results, searchType) {
         return;
     }
 
-    // 显示搜索结果
-    results.forEach(result => {
-        const li = document.createElement('li');
-
-        if (searchType === 'resource') {
-            li.innerHTML = `
-                <div><strong>${result.name}</strong> (${result.type})</div>
-                <div>国家: ${getCountryName(result.country)}</div>
-                <div>数量: ${result.amount}</div>
-            `;
-        } else if (searchType === 'prize') {
-            li.innerHTML = `
-                <div><strong>${result.name}</strong></div>
-                <div>所属抽奖机: ${result.machineName}</div>
-                <div>国家: ${getCountryName(result.country)}</div>
-            `;
-        }
-
-        // 点击结果项，跳转到地图位置
-        li.addEventListener('click', function() {
-            // 切换到对应的国家
-            switchCountry(result.country);
-            // 定位到资源点或抽奖机位置
-            map.setView([result.y, result.x], 15);
-            // 隐藏搜索结果
-            document.querySelector('.search-results').style.display = 'none';
+    if (searchType === 'prize') {
+        // 对奖品搜索结果进行分组统计
+        const prizeGroups = {};
+        
+        results.forEach(result => {
+            const prizeName = typeof result.name === 'object' ? result.name.name : result.name;
+            const key = `${result.machineId}-${prizeName}`;
+            
+            if (!prizeGroups[key]) {
+                prizeGroups[key] = {
+                    prizeName: prizeName,
+                    machineName: result.machineName,
+                    machineId: result.machineId,
+                    country: result.country,
+                    x: result.x,
+                    y: result.y,
+                    count: 0
+                };
+            }
+            prizeGroups[key].count++;
         });
 
-        resultsList.appendChild(li);
-    });
+        // 计算每个转盘的未抽取奖品总数
+        const machineStats = {};
+        for (const country in machinesData.machines) {
+            if (machinesData.machines.hasOwnProperty(country)) {
+                machinesData.machines[country].forEach(machine => {
+                    const machineType = machine.type;
+                    const typeData = machinesData.types[machineType];
+                    
+                    if (typeData && typeData.prizes) {
+                        let totalUnclaimed = 0;
+                        typeData.prizes.forEach((prize, index) => {
+                            const isClaimed = userState.claimedPrizes[machine.machineId] && userState.claimedPrizes[machine.machineId].includes(index);
+                            if (!isClaimed) {
+                                totalUnclaimed++;
+                            }
+                        });
+                        machineStats[machine.machineId] = {
+                            totalUnclaimed: totalUnclaimed,
+                            totalPrizes: typeData.prizes.length
+                        };
+                    }
+                });
+            }
+        }
+
+        // 显示分组后的结果
+        Object.values(prizeGroups).forEach(group => {
+            const li = document.createElement('li');
+            const machineStat = machineStats[group.machineId];
+            
+            li.innerHTML = `
+                <div><strong>${group.prizeName}</strong> × ${group.count}</div>
+                <div>所属转盘: ${group.machineName}</div>
+                <div>类型: ${group.type}</div>
+                <div>该转盘未抽取: ${machineStat.totalUnclaimed}/${machineStat.totalPrizes}</div>
+            `;
+
+            // 点击结果项，跳转到地图位置
+            li.addEventListener('click', function() {
+                // 切换到对应的国家
+                const countryRadio = document.querySelector(`input[name="country"][value="${group.country}"]`);
+                if (countryRadio) {
+                    countryRadio.click();
+                }
+                // switchCountry(group.country);
+                // 定位到资源点或抽奖机位置
+                map.setView([group.y, group.x], 5);
+                // 隐藏搜索结果
+                document.querySelector('.search-results').style.display = 'none';
+            });
+
+            resultsList.appendChild(li);
+        });
+    } else {
+        // 资源搜索结果保持原样显示
+        results.forEach(result => {
+            const li = document.createElement('li');
+
+            if (searchType === 'resource') {
+                li.innerHTML = `
+                    <div><strong>${result.name}</strong></div>
+                    <div>国家: ${result.country}</div>
+                    <div>资源点: ${result.coordinates.length}个</div>
+                `;
+            }
+
+            // 点击结果项，跳转到地图位置
+            li.addEventListener('click', function() {
+                // 切换到对应的国家
+                const countryRadio = document.querySelector(`input[name="country"][value="${result.country}"]`);
+                if (countryRadio) {
+                    countryRadio.click();
+                }
+                //隐藏其他资源
+                document.querySelectorAll('input[type="checkbox"]').forEach(item => {
+                    item.value !== result.name ? item.checked = false : item.checked = true;
+                });
+                 // 触发资源筛选更新
+                filterResourcesByType();
+                
+                // 保存资源类型状态到cookies
+                saveResourceTypesState();
+                // loadCountryMarkers(result.country);
+            });
+
+            resultsList.appendChild(li);
+        });
+    }
 
     document.querySelector('.search-results').style.display = 'block';
 }

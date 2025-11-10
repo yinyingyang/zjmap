@@ -36,6 +36,13 @@ function loadMachinesData() {
             return response.json();
         })
         .then(data => {
+            // 将逗号分隔的奖品字符串转换为数组（支持中英文逗号）
+            for (const type in data.types) {
+                if (data.types.hasOwnProperty(type) && typeof data.types[type].prizes === 'string') {
+                    data.types[type].prizes = data.types[type].prizes.split(/[,\uff0c]/);
+                }
+            }
+            
             machinesData = data;
             console.log('抽奖机数据加载成功');
         })

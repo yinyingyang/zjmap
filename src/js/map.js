@@ -7,8 +7,8 @@ function initMap() {
         zoomControl: false, 
         attributionControl: false,
         crs: L.CRS.Simple,  // 使用简单坐标系统
-        minZoom: 1,  // 最小缩小倍数
-        maxZoom: 6   // 最大放大倍数
+        minZoom: 2,  // 最小缩小倍数
+        maxZoom: 5   // 最大放大倍数
     }).setView(userState.lastCenter, userState.lastZoom);
 
     // 确保移除所有可能的控制元素
@@ -142,8 +142,8 @@ function loadCountryMarkers(country) {
     }
 
     // 加载抽奖机标记
-    if (machinesData[country]) {
-        machinesData[country].forEach(machine => {
+    if (machinesData.machines && machinesData.machines[country]) {
+        machinesData.machines[country].forEach(machine => {
             addMachineMarker(machine);
         });
     } else {
@@ -187,16 +187,26 @@ function addMachineMarker(machine) {
     // 抽奖机图标
     const icon = L.icon({
         iconUrl: 'src/img/icons/抽奖机.png',
-        iconSize: [18, 18],
-        iconAnchor: [15, 15]
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
     });
 
     const marker = L.marker([machine.y, machine.x], { icon: icon }).addTo(map);
 
     // 绑定弹窗
+    const machineType = machine.type;
+    const typeData = machinesData.types[machineType];
+    const totalPrizeCount = typeData && typeData.prizes ? typeData.prizes.length : 0;
+    
+    // 计算已抽取的奖品数量
+    const claimedPrizes = userState.claimedPrizes[machine.machineId] || [];
+    const claimedCount = claimedPrizes.length;
+    const remainingCount = totalPrizeCount - claimedCount;
+    
     marker.bindPopup(`
         <b>${machine.name}</b><br>
-        奖品数量: ${machine.prizes.length}<br>
+        类型: ${machine.type}<br>
+        奖品数量: ${remainingCount}/${totalPrizeCount}<br>
         坐标: ${machine.x}, ${machine.y}
     `);
 
@@ -268,47 +278,119 @@ function showResourceDetail(resource) {
     document.getElementById('resource-detail').style.display = 'block';
 }
 
+// 生成螺旋布局坐标
+function generateSpiralPositions() {
+    const positions = [];
+    const rows = 9;
+    const cols = 7;
+    
+    // 定义螺旋路径
+    // 第一行：1-7
+    for (let col = 0; col < cols; col++) {
+        positions.push({ row: 0, col: col, number: col + 1 });
+    }
+    
+    // 右侧列：8-15
+    for (let row = 1; row < rows - 1; row++) {
+        positions.push({ row: row, col: cols - 1, number: 7 + row });
+    }
+    
+    // 底行：16-22 (反向)
+    for (let col = cols - 1; col >= 0; col--) {
+        positions.push({ row: rows - 1, col: col, number: 14 + (cols - col) });
+    }
+    
+    // 左侧列：23-28
+    for (let row = rows - 2; row >= 1; row--) {
+        positions.push({ row: row, col: 0, number: 21 + (rows - 1 - row) });
+    }
+    
+    return positions;
+}
+
 // 显示抽奖机详情
 function showMachineDetail(machine) {
-    document.getElementById('machine-name').textContent = machine.name;
 
     const prizesList = document.getElementById('prizes-list');
     prizesList.innerHTML = '';
 
-    // 生成奖品列表
-    machine.prizes.forEach(prize => {
-        const li = document.createElement('li');
-        const isClaimed = userState.claimedPrizes[machine.machineId] && userState.claimedPrizes[machine.machineId].includes(prize.prizeId);
+    // 从新数据结构中获取奖品列表
+    const machineType = machine.type;
+    const typeData = machinesData.types[machineType];
+    
+    if (!typeData || !typeData.prizes) {
+        console.error('未找到类型数据:', machineType);
+        return;
+    }
 
-        li.innerHTML = `
-            <span class="${isClaimed ? 'prize-claimed' : 'prize-unclaimed'}">${prize.name}</span>
-            <input type="checkbox" class="prize-checkbox" data-machine-id="${machine.machineId}" data-prize-id="${prize.prizeId}" ${isClaimed ? 'checked' : ''}>
-        `;
+    // 生成螺旋布局坐标
+    const positions = generateSpiralPositions();
+    
+    // 创建9x7的表格布局
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'prizes-grid';
+    
+    // 创建所有格子
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 7; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'prize-cell empty';
+            
+            gridContainer.appendChild(cell);
+        }
+    }
 
-        prizesList.appendChild(li);
+    // 填充奖品数据
+    typeData.prizes.forEach((prize, index) => {
+        if (index < positions.length) {
+            const pos = positions[index];
+            const cellIndex = pos.row * 7 + pos.col;
+            const cell = gridContainer.children[cellIndex];
+            
+            // 检查是否已抽取
+            const isClaimed = userState.claimedPrizes[machine.machineId] && userState.claimedPrizes[machine.machineId].includes(index);
+            
+            cell.textContent = prize;
+            cell.className = isClaimed ? 'prize-cell prize-claimed' : 'prize-cell';
+            cell.dataset.prizeIndex = index;
+            cell.dataset.prizeName = prize;
+            cell.dataset.number = pos.number;
+            
+            // 添加点击事件
+            cell.addEventListener('click', function() {
+                const prizeIndex = parseInt(this.dataset.prizeIndex);
+                const isCurrentlyClaimed = this.classList.contains('prize-claimed');
+                const newClaimedState = !isCurrentlyClaimed;
+                
+                // 更新用户状态
+                updateClaimedPrize(machine.machineId, prizeIndex, newClaimedState);
+                
+                // 更新UI
+                if (newClaimedState) {
+                    this.classList.add('prize-claimed');
+                } else {
+                    this.classList.remove('prize-claimed');
+                }
+            });
+            
+            // 添加悬停效果
+            cell.addEventListener('mouseenter', function() {
+                if (this.style.backgroundColor !== 'rgb(108, 117, 125)' && this.style.backgroundColor !== '#6c757d') {
+                    this.style.backgroundColor = '#e9ecef';
+                    this.style.transform = 'scale(1.05)';
+                }
+            });
+            
+            cell.addEventListener('mouseleave', function() {
+                if (this.style.backgroundColor !== 'rgb(108, 117, 125)' && this.style.backgroundColor !== '#6c757d') {
+                    this.style.backgroundColor = '#f8f9fa';
+                    this.style.transform = 'none';
+                }
+            });
+        }
     });
 
-    // 添加复选框事件
-    document.querySelectorAll('.prize-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const machineId = this.getAttribute('data-machine-id');
-            const prizeId = this.getAttribute('data-prize-id');
-            const isChecked = this.checked;
-
-            // 更新用户状态
-            updateClaimedPrize(machineId, prizeId, isChecked);
-
-            // 更新UI
-            const span = this.previousElementSibling;
-            if (isChecked) {
-                span.classList.add('prize-claimed');
-                span.classList.remove('prize-unclaimed');
-            } else {
-                span.classList.add('prize-unclaimed');
-                span.classList.remove('prize-claimed');
-            }
-        });
-    });
+    prizesList.appendChild(gridContainer);
 
     document.getElementById('machine-detail').style.display = 'block';
 }
@@ -329,4 +411,26 @@ function updateClaimedPrize(machineId, prizeId, isClaimed) {
 
     // 保存用户状态
     saveUserState();
+
+    // 如果当前显示的是这个抽奖机的详情，更新弹窗中的奖品数量显示
+    const machineDetailElement = document.getElementById('machine-detail');
+    if (machineDetailElement.style.display === 'block') {
+        const currentMachineTitle = document.querySelector('#machine-detail h3')?.textContent;
+        if (currentMachineTitle) {
+            // 从machinesData中找到对应的抽奖机数据
+            let currentMachine = null;
+            for (const country in machinesData.countries) {
+                const countryMachines = machinesData.countries[country];
+                const foundMachine = countryMachines.find(machine => machine.machineId === machineId);
+                if (foundMachine) {
+                    currentMachine = foundMachine;
+                    break;
+                }
+            }
+            if (currentMachine) {
+                // 重新显示该抽奖机详情以更新奖品数量
+                showMachineDetail(currentMachine);
+            }
+        }
+    }
 }
