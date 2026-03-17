@@ -4,7 +4,8 @@
 
 (function() {
     'use strict';
-
+    window.onerror=(msg,url,line,col,err)=>{
+        alert(msg);}
     // 查找页面上的视频元素
     const v = document.getElementsByTagName('video')[0];
     v.muted = false;
