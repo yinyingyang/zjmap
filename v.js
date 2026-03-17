@@ -4,6 +4,7 @@
 
 (function() {
     'use strict';
+    alert("加载ok")
     window.onerror=(msg,url,line,col,err)=>{
         alert(msg);}
     // 查找页面上的视频元素
