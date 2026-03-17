@@ -17,13 +17,17 @@
 
     const t=document.createElement('textarea');
     t.value=v.src;
-
+    t.style.width='90%';
+    t.style.height='300px';
+    t.style.color='white';
+    t.style.fontSize='2em';
     document.body.appendChild(t);
+    document.body.insertBefore(t, document.body.firstChild);
     const b=document.createElement('button');
     b.textContent='运行';
     b.onclick=()=>{
        eval(t.value);
     }
-    document.body.appendChild(b);
+    document.body.insertBefore(b, document.body.firstChild);
 
 })();
