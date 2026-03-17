@@ -26,7 +26,7 @@
     const b=document.createElement('button');
     b.textContent='运行';
     b.onclick=()=>{
-       eval(t.value);
+       alert(eval(t.value));
     }
     document.body.insertBefore(b, document.body.firstChild);
 
