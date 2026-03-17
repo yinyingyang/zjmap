@@ -17,12 +17,12 @@
     const t=document.createElement('textarea');
     t.value=v.src;
 
+    document.body.appendChild(t);
     const b=document.createElement('button');
     b.textContent='运行';
     b.onclick=()=>{
        eval(t.value);
     }
-    document.body.insertBefore(b, document.body.firstChild);
+    document.body.appendChild(b);
 
-    document.body.insertBefore(t, document.body.firstChild);
 })();
